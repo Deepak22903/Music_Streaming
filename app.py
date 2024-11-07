@@ -74,8 +74,7 @@ def login():
     
     return render_template("login.html")  # Always render the login page when GET request or failed login
 
-# Logout Route
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()  # Clears the session
     flash("You have been logged out.")
@@ -298,6 +297,138 @@ def update_artist(id):
     conn.close()
     
     return render_template("update_artist.html", artist=artist)
+
+@app.route('/update_song/<int:song_id>', methods=['GET', 'POST'])
+def update_song(song_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the song by its ID
+    cursor.execute("SELECT SongID, SongName, ArtistID FROM Song WHERE SongID = ?", (song_id,))
+    song = cursor.fetchone()
+
+    # Fetch all artists for the dropdown list
+    cursor.execute("SELECT ArtistID, ArtistName FROM Artist")
+    artists = cursor.fetchall()
+
+    if request.method == 'POST':
+        song_name = request.form['song_name']
+        artist_id = request.form['artist_id']
+
+        # Update the song in the database
+        cursor.execute("UPDATE Song SET SongName = ?, ArtistID = ? WHERE SongID = ?", 
+                       (song_name, artist_id, song_id))
+        conn.commit()
+        conn.close()
+
+        flash("Song updated successfully!")
+        return redirect(url_for('index'))  # Redirect to the index page or another page as needed
+
+    conn.close()
+    return render_template('update_song.html', song=song, artists=artists)
+
+@app.route('/update_playlist/<int:playlist_id>', methods=['GET', 'POST'])
+def update_playlist(playlist_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the playlist by its ID
+    cursor.execute("SELECT PlaylistID, PlaylistName, ListenerID FROM Playlist WHERE PlaylistID = ?", (playlist_id,))
+    playlist = cursor.fetchone()
+
+    # Fetch all listeners for the dropdown list
+    cursor.execute("SELECT ListenerID, ListenerName FROM Listener")
+    listeners = cursor.fetchall()
+
+    if request.method == 'POST':
+        playlist_name = request.form['playlist_name']
+        listener_id = request.form['listener_id']
+
+        # Update the playlist in the database
+        cursor.execute("UPDATE Playlist SET PlaylistName = ?, ListenerID = ? WHERE PlaylistID = ?", 
+                       (playlist_name, listener_id, playlist_id))
+        conn.commit()
+        conn.close()
+
+        flash("Playlist updated successfully!")
+        return redirect(url_for('index'))  # Redirect to the index page or another page as needed
+
+    conn.close()
+    return render_template('update_playlist.html', playlist=playlist, listeners=listeners)
+
+
+@app.route('/update_play_history/<int:listener_id>/<int:song_id>/<string:play_date>', methods=['GET', 'POST'])
+def update_play_history(listener_id, song_id, play_date):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the play history by listener_id, song_id, and play_date
+    cursor.execute("SELECT ListenerID, SongID, PlayDate FROM PlayHistory WHERE ListenerID = ? AND SongID = ? AND PlayDate = ?", 
+                   (listener_id, song_id, play_date))
+    play_history = cursor.fetchone()
+
+    # Fetch all listeners and songs for the dropdown lists
+    cursor.execute("SELECT ListenerID, ListenerName FROM Listener")
+    listeners = cursor.fetchall()
+
+    cursor.execute("SELECT SongID, SongName FROM Song")
+    songs = cursor.fetchall()
+
+    if request.method == 'POST':
+        new_listener_id = request.form['listener_id']
+        new_song_id = request.form['song_id']
+        new_play_date = request.form['play_date']
+
+        # Update the play history in the database
+        cursor.execute("UPDATE PlayHistory SET ListenerID = ?, SongID = ?, PlayDate = ? WHERE ListenerID = ? AND SongID = ? AND PlayDate = ?", 
+                       (new_listener_id, new_song_id, new_play_date, listener_id, song_id, play_date))
+        conn.commit()
+        conn.close()
+
+        flash("Play history updated successfully!")
+        return redirect(url_for('index'))  # Redirect to the index page or another page as needed
+
+    conn.close()
+    return render_template('update_play_history.html', play_history=play_history, listeners=listeners, songs=songs)
+
+
+
+@app.route('/update_playlist_song/<int:playlist_id>/<int:song_id>', methods=['GET', 'POST'])
+def update_playlist_song(playlist_id, song_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Fetch the playlist song by playlist_id and song_id
+    cursor.execute("SELECT PlaylistID, SongID FROM PlaylistSong WHERE PlaylistID = ? AND SongID = ?", 
+                   (playlist_id, song_id))
+    playlist_song = cursor.fetchone()
+
+    # Fetch all playlists and songs for the dropdown lists
+    cursor.execute("SELECT PlaylistID, PlaylistName FROM Playlist")
+    playlists = cursor.fetchall()
+
+    cursor.execute("SELECT SongID, SongName FROM Song")
+    songs = cursor.fetchall()
+
+    if request.method == 'POST':
+        new_playlist_id = request.form['playlist_id']
+        new_song_id = request.form['song_id']
+
+        # Update the playlist song in the database
+        cursor.execute("UPDATE PlaylistSong SET PlaylistID = ?, SongID = ? WHERE PlaylistID = ? AND SongID = ?", 
+                       (new_playlist_id, new_song_id, playlist_id, song_id))
+        conn.commit()
+        conn.close()
+
+        flash("Playlist song updated successfully!")
+        return redirect(url_for('index'))  # Redirect to the index page or another page as needed
+
+    conn.close()
+    return render_template('update_playlist_song.html', playlist_song=playlist_song, playlists=playlists, songs=songs)
+
+    return render_template('update_playlist_song.html', playlist_song=playlist_song, playlists=playlists, songs=songs)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
