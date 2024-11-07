@@ -1,0 +1,22 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Listener</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <h1>Update Listener</h1>
+    <form action="/update_listener/{{ listener[0] }}" method="POST">
+        <label for="listener_name">Name:</label>
+        <input type="text" id="listener_name" name="listener_name" value="{{ listener[1] }}" required>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{ listener[2] }}" required>
+        
+        <button type="submit">Update Listener</button>
+    </form>
+</body>
+</html>

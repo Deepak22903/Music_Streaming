@@ -1,0 +1,20 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Artist</title>
+    
+<link rel="stylesheet" href="templates/styles.css">
+
+</head>
+<body>
+    <h1>Update Artist</h1>
+    <form action="/update_artist/{{ artist[0] }}" method="POST">
+        <label for="artist_name">Artist Name:</label>
+        <input type="text" id="artist_name" name="artist_name" value="{{ artist[1] }}" required>
+        
+        <button type="submit">Update Artist</button>
+    </form>
+</body>
+</html>
